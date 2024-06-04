@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'dart:typed_data';
 
@@ -10,6 +11,7 @@ class mainPage extends StatefulWidget {
 }
 
 class _mainPageState extends State<mainPage> {
+  TextEditingController linearController = TextEditingController();
   String _prediction = "";
   Interpreter? _interpreter;
 
@@ -77,6 +79,7 @@ class _mainPageState extends State<mainPage> {
               children: [
                 Expanded(
                   child: TextField(
+                    controller: linearController,
                     decoration: InputDecoration(
                       hintText: 'Enter a number',
                       border: OutlineInputBorder(
@@ -99,10 +102,17 @@ class _mainPageState extends State<mainPage> {
                       ),
                       backgroundColor: Color.fromARGB(255, 235, 190, 108)),
                   onPressed: () {
-                    predict(5.0);
+                    //parse linearController value to double
+                    try {
+                     double linearValue = double.parse(linearController.text);
+                     predict(linearValue);
+                    } catch (e) {
+                      print("error: ${e}");
+                    }
+                    
                   },
                   child: const Text(
-                    'Predict for 5.0',
+                    'x=2y',
                     style: TextStyle(
                       color: Colors.black,
                     ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'dart:typed_data';
 
@@ -14,6 +13,7 @@ class _mainPageState extends State<mainPage> {
   TextEditingController linearController = TextEditingController();
   String _prediction = "";
   Interpreter? _interpreter;
+  Interpreter? _interpreter2;
 
   @override
   void initState() {
@@ -24,6 +24,7 @@ class _mainPageState extends State<mainPage> {
   Future<void> loadModel() async {
     try {
       _interpreter = await Interpreter.fromAsset('assets/linear_model.tflite');
+      _interpreter2 = await Interpreter.fromAsset('assets/linear_model.tflite2');
       print("Model loaded");
     } catch (e) {
       print("Failed to load model: $e");
@@ -113,6 +114,60 @@ class _mainPageState extends State<mainPage> {
                   },
                   child: const Text(
                     'x=2y',
+                    style: TextStyle(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              'Prediction: $_prediction',
+              style: TextStyle(fontSize: 20),
+            ),
+
+
+             Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: linearController,
+                    decoration: InputDecoration(
+                      hintText: 'Enter a number',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1.0),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      backgroundColor: Color.fromARGB(255, 235, 190, 108)),
+                  onPressed: () {
+                    //parse linearController value to double
+                    try {
+                     double linearValue = double.parse(linearController.text);
+                     predict(linearValue);
+                    } catch (e) {
+                      print("error: ${e}");
+                    }
+                    
+                  },
+                  child: const Text(
+                    'Predict',
                     style: TextStyle(
                       color: Colors.black,
                     ),

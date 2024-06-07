@@ -11,7 +11,9 @@ class mainPage extends StatefulWidget {
 
 class _mainPageState extends State<mainPage> {
   TextEditingController linearController = TextEditingController();
+  TextEditingController exponentialController = TextEditingController();
   String _prediction = "";
+  String _prediction2 = "";
   Interpreter? _interpreter;
   Interpreter? _interpreter2;
 
@@ -24,7 +26,7 @@ class _mainPageState extends State<mainPage> {
   Future<void> loadModel() async {
     try {
       _interpreter = await Interpreter.fromAsset('assets/linear_model.tflite');
-      _interpreter2 = await Interpreter.fromAsset('assets/linear_model.tflite2');
+      _interpreter2 = await Interpreter.fromAsset('assets/nonlinear_model.tflite');
       print("Model loaded");
     } catch (e) {
       print("Failed to load model: $e");
@@ -45,6 +47,26 @@ class _mainPageState extends State<mainPage> {
 
       setState(() {
         _prediction = outputBuffer[0][0].toString();
+      });
+    } catch (e) {
+      print("Error during prediction: $e");
+    }
+  }
+
+  Future<void> predict2(double input) async {
+    if (_interpreter2 == null) {
+      print("Model not loaded yet.");
+      return;
+    }
+
+    try {
+      var inputBuffer = _convertInputToByteBuffer(input);
+      var outputBuffer = List.filled(1, 0.0).reshape([1, 1]);
+
+      _interpreter2!.run(inputBuffer, outputBuffer);
+
+      setState(() {
+        _prediction2 = outputBuffer[0][0].toString();
       });
     } catch (e) {
       print("Error during prediction: $e");
@@ -103,14 +125,13 @@ class _mainPageState extends State<mainPage> {
                       ),
                       backgroundColor: Color.fromARGB(255, 235, 190, 108)),
                   onPressed: () {
-                    //parse linearController value to double
+                    // Parse linearController value to double
                     try {
-                     double linearValue = double.parse(linearController.text);
-                     predict(linearValue);
+                      double linearValue = double.parse(linearController.text);
+                      predict(linearValue);
                     } catch (e) {
                       print("error: ${e}");
                     }
-                    
                   },
                   child: const Text(
                     'x=2y',
@@ -128,13 +149,11 @@ class _mainPageState extends State<mainPage> {
               'Prediction: $_prediction',
               style: TextStyle(fontSize: 20),
             ),
-
-
-             Row(
+            Row(
               children: [
                 Expanded(
                   child: TextField(
-                    controller: linearController,
+                    controller: exponentialController,
                     decoration: InputDecoration(
                       hintText: 'Enter a number',
                       border: OutlineInputBorder(
@@ -157,14 +176,13 @@ class _mainPageState extends State<mainPage> {
                       ),
                       backgroundColor: Color.fromARGB(255, 235, 190, 108)),
                   onPressed: () {
-                    //parse linearController value to double
+                    // Parse exponentialController value to double
                     try {
-                     double linearValue = double.parse(linearController.text);
-                     predict(linearValue);
+                      double exponentialValue = double.parse(exponentialController.text);
+                      predict2(exponentialValue);
                     } catch (e) {
                       print("error: ${e}");
                     }
-                    
                   },
                   child: const Text(
                     'Predict',
@@ -179,7 +197,7 @@ class _mainPageState extends State<mainPage> {
               height: 10,
             ),
             Text(
-              'Prediction: $_prediction',
+              'Prediction: $_prediction2',
               style: TextStyle(fontSize: 20),
             ),
           ],
